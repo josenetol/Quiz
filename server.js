@@ -11,7 +11,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: "https://quiz-kj4a.onrender.com", // produção
     methods: ["GET", "POST"]
   }
 });

@@ -1,4 +1,4 @@
-const socket = io();
+const socket = io("https://quiz-kj4a.onrender.com");
 
 // Estado da aplicação
 let appState = {
@@ -399,7 +399,6 @@ function startExperienceScreen() {
     updateInterface();
     console.log('Client: updateInterface() called.');
 }
-}
 
 function loadQuestion() {
     if (appState.currentQuestion >= appState.questions.length) {
@@ -527,15 +526,14 @@ function showBothAnswered(answersFromSocket = null) {
     let p1Answer = appState.participants[1].answer;
     let p2Answer = appState.participants[2].answer;
 
-    if (appState.mode === 'online' && answersFromSocket) {
+    if (appState.mode === 'online' && answersFromSocket && appState.participantSocketIds) {
         // No modo online, as respostas vêm do servidor e são mapeadas pelos socket.id
-        // Precisamos mapear os socket.id para os participantId (1 ou 2)
-        const playerSockets = Object.keys(answersFromSocket);
-        const player1SocketId = playerSockets.find(id => appState.participants[1].name === answersFromSocket[id].playerName);
-        const player2SocketId = playerSockets.find(id => appState.participants[2].name === answersFromSocket[id].playerName);
+        // Usamos os socket.id armazenados para mapear as respostas corretamente
+        const p1SocketId = appState.participantSocketIds[1];
+        const p2SocketId = appState.participantSocketIds[2];
 
-        p1Answer = answersFromSocket[player1SocketId].answer;
-        p2Answer = answersFromSocket[player2SocketId].answer;
+        p1Answer = answersFromSocket[p1SocketId] ? answersFromSocket[p1SocketId].answer : '';
+        p2Answer = answersFromSocket[p2SocketId] ? answersFromSocket[p2SocketId].answer : '';
     }
 
     // Mostrar respostas
