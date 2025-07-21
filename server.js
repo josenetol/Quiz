@@ -5,9 +5,7 @@ const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
 const path = require('path');
-const questionsModule = require('./questions.js');
-const fetishQuestions = questionsModule.fetishQuestions;
-const getRandomQuestions = questionsModule.getRandomQuestions;
+const { fetishQuestions, getRandomQuestions } = require('./serverQuestions.js');
 
 const app = express();
 const server = http.createServer(app);

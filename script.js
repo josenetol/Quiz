@@ -563,9 +563,14 @@ function showBothAnswered(answersFromSocket = null) {
     let p1Answer = '';
     let p2Answer = '';
 
+    console.log('showBothAnswered: appState.participants[1].name', appState.participants[1].name);
+    console.log('showBothAnswered: appState.participants[2].name', appState.participants[2].name);
+    console.log('showBothAnswered: answersFromSocket', answersFromSocket);
+
     if (appState.mode === 'online' && answersFromSocket) {
         for (const socketId in answersFromSocket) {
             const answerData = answersFromSocket[socketId];
+            console.log('showBothAnswered: Processing answer from', answerData.playerName, 'with answer', answerData.answer);
             if (answerData.playerName === appState.participants[1].name) {
                 p1Answer = answerData.answer;
             } else if (answerData.playerName === appState.participants[2].name) {
