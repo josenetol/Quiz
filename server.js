@@ -5,12 +5,9 @@ const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
 const path = require('path');
-const { fetishQuestions } = require('./questions.js');
-
-function getRandomQuestions(count = 10) {
-    const shuffled = [...fetishQuestions].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
-}
+const questionsModule = require('./questions.js');
+const fetishQuestions = questionsModule.fetishQuestions;
+const getRandomQuestions = questionsModule.getRandomQuestions;
 
 const app = express();
 const server = http.createServer(app);

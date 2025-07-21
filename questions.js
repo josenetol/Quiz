@@ -96,3 +96,8 @@ function getRandomQuestions(count = 10) {
     const shuffled = [...fetishQuestions].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
 }
+
+module.exports = {
+    fetishQuestions,
+    getRandomQuestions
+};

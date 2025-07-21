@@ -152,6 +152,27 @@ function initializeApp() {
         }
         elements.connectionStatus.textContent = 'Aguardando o outro jogador...';
         showScreen('share');
+
+        // Garante que os elementos existem antes de tentar usá-los
+        if (!elements.shareLink || !elements.qrCode) {
+            console.error('Elemento de link ou QR Code não encontrado no objeto elements.');
+            return;
+        }
+
+        elements.shareLink.value = shareUrl;
+        console.log("Link gerado:", elements.shareLink.value);
+        if (typeof QRCode !== 'undefined') {
+            QRCode.toCanvas(elements.qrCode, shareUrl, {
+                width: 200,
+                margin: 2,
+                color: {
+                    dark: '#667eea',
+                    light: '#ffffff'
+                }
+            });
+        } else {
+            console.error("QRCode library not loaded or initialized yet. Cannot generate QR code.");
+        }
     });
 
     socket.on('playerJoined', (data) => {
@@ -687,7 +708,7 @@ function resetApp() {
         mode: 'local',
         currentPerson: 1,
         currentQuestion: 0,
-        questions: fetishQuestions, // Mantido para o modo local
+        questions: [], // Limpa as perguntas ao resetar
         participants: {
             1: { name: '', answered: false, answer: '' },
             2: { name: '', answered: false, answer: '' }
