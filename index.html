@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conecte-se - Descubra mais sobre vocês dois</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Tela de Início -->
+        <div id="start-screen" class="screen active">
+            <div class="logo">
+                <i class="fas fa-heart"></i>
+                <h1>Conecte-se</h1>
+            </div>
+            <p class="subtitle">Descubram mais um sobre o outro através de perguntas especiais</p>
+            
+            <div class="setup-container">
+                <div class="input-group" id="person1-input-group">
+                    <label for="person1-name">Nome da primeira pessoa:</label>
+                    <input type="text" id="person1-name" placeholder="Digite seu nome" maxlength="20">
+                </div>
+                <div class="input-group" id="person2-input-group">
+                    <label for="person2-name">Nome da segunda pessoa:</label>
+                    <input type="text" id="person2-name" placeholder="Digite o nome da outra pessoa" maxlength="20">
+                </div>
+                
+                <div class="sharing-options">
+                    <h3>Como vocês vão participar?</h3>
+                    <div class="option-buttons">
+                        <button class="option-btn active" data-mode="local">
+                            <i class="fas fa-users"></i>
+                            <span>Mesmo dispositivo</span>
+                            <small>Vocês dois no mesmo celular/computador</small>
+                        </button>
+                        <button class="option-btn" data-mode="online">
+                            <i class="fas fa-link"></i>
+                            <span>Dispositivos separados</span>
+                            <small>Cada um no seu celular/computador</small>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="start-experience" class="btn-primary">
+                <i class="fas fa-play"></i> Começar a descoberta
+            </button>
+        </div>
+
+        <!-- Tela de Link de Compartilhamento -->
+        <div id="share-screen" class="screen">
+            <div class="share-container">
+                <div class="logo">
+                    <i class="fas fa-share-alt"></i>
+                    <h2>Compartilhe com a outra pessoa</h2>
+                </div>
+                
+                <div class="share-info">
+                    <p>Envie este link para <strong id="other-person-name">a outra pessoa</strong>:</p>
+                    
+                    <div class="link-container">
+                        <input type="text" id="share-link" readonly>
+                        <button id="copy-link" class="btn-copy">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="qr-container">
+                        <div id="qr-code"></div>
+                        <p>Ou escaneie este QR Code</p>
+                    </div>
+                </div>
+                
+                <div class="waiting-status">
+                    <div class="spinner"></div>
+                    <p>Aguardando a outra pessoa entrar...</p>
+                    <div class="status-indicator">
+                        <span id="connection-status">Conectando...</span>
+                    </div>
+                </div>
+                
+                <button id="start-local-instead" class="btn-secondary">
+                    <i class="fas fa-users"></i> Usar mesmo dispositivo
+                </button>
+            </div>
+        </div>
+
+        <!-- Tela Principal da Experiência -->
+        <div id="experience-screen" class="screen">
+            <div class="experience-header">
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <span class="progress-text">Pergunta <span id="current-question">1</span> de <span id="total-questions">10</span></span>
+                </div>
+                
+                <div class="participants-info">
+                    <div class="participant-card" id="person1-card">
+                        <div class="participant-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="participant-details">
+                            <h3 id="person1-display">Pessoa 1</h3>
+                            <div class="status" id="person1-status">
+                                <i class="fas fa-clock"></i>
+                                <span>Aguardando</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="connection-indicator">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    
+                    <div class="participant-card" id="person2-card">
+                        <div class="participant-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="participant-details">
+                            <h3 id="person2-display">Pessoa 2</h3>
+                            <div class="status" id="person2-status">
+                                <i class="fas fa-hourglass-half"></i>
+                                <span>Aguardando</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-container">
+                <div class="current-turn-indicator">
+                    <span id="current-turn-text">Vez da Pessoa 1</span>
+                </div>
+                
+                <div class="question-card">
+                    <div class="question-number">
+                        <span id="question-number">1</span>
+                    </div>
+                    <h2 id="question-text">Carregando pergunta...</h2>
+                    <p id="question-description">Descrição da pergunta</p>
+                </div>
+
+                <div class="answer-container">
+                    <div class="text-input-area">
+                        <textarea id="answer-input" placeholder="Escreva sua resposta aqui..." maxlength="500"></textarea>
+                        <div class="char-counter">
+                            <span id="char-count">0</span>/500
+                        </div>
+                    </div>
+                    
+                    <button id="submit-answer" class="btn-primary" disabled>
+                        <i class="fas fa-paper-plane"></i> Enviar resposta
+                    </button>
+                </div>
+
+                <div class="waiting-other" id="waiting-other" style="display: none;">
+                    <div class="waiting-animation">
+                        <div class="pulse"></div>
+                    </div>
+                    <h3>Aguardando a resposta de <span id="waiting-for-name">...</span></h3>
+                    <p>Você já respondeu esta pergunta. Aguarde a outra pessoa responder para continuar.</p>
+                </div>
+
+                <div class="both-answered" id="both-answered" style="display: none;">
+                    <div class="answers-reveal">
+                        <h3>Vocês dois responderam!</h3>
+                        <div class="answers-comparison">
+                            <div class="answer-box">
+                                <h4 id="answer1-author">Pessoa 1</h4>
+                                <p id="answer1-text">Resposta da pessoa 1</p>
+                            </div>
+                            <div class="answer-box">
+                                <h4 id="answer2-author">Pessoa 2</h4>
+                                <p id="answer2-text">Resposta da pessoa 2</p>
+                            </div>
+                        </div>
+                        <button id="next-question" class="btn-primary">
+                            <i class="fas fa-arrow-right"></i> Próxima pergunta
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela de Resultado Final -->
+        <div id="result-screen" class="screen">
+            <div class="result-container">
+                <div class="celebration">
+                    <i class="fas fa-heart"></i>
+                    <h1>Parabéns!</h1>
+                    <p>Vocês completaram a jornada de descoberta!</p>
+                </div>
+                
+                <div class="summary-container">
+                    <h2>Resumo das descobertas</h2>
+                    <div id="answers-summary" class="answers-summary">
+                        <!-- Respostas serão inseridas aqui dinamicamente -->
+                    </div>
+                </div>
+                
+                <div class="final-actions">
+                    <button id="download-results" class="btn-primary">
+                        <i class="fas fa-download"></i> Baixar conversa
+                    </button>
+                    <button id="share-results" class="btn-secondary">
+                        <i class="fas fa-share"></i> Compartilhar
+                    </button>
+                    <button id="start-again" class="btn-secondary">
+                        <i class="fas fa-redo"></i> Começar novamente
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Conexão -->
+    <div id="connection-modal" class="modal">
+        <div class="modal-content">
+            <h3>Status da Conexão</h3>
+            <div class="connection-info">
+                <div class="status-icon">
+                    <i class="fas fa-wifi"></i>
+                </div>
+                <p id="connection-message">Estabelecendo conexão...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="questions.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
