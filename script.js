@@ -126,6 +126,7 @@ function initializeApp() {
 
     // Socket.IO Event Listeners
     socket.on('sessionCreated', (data) => {
+        console.log('Client: Received sessionCreated event. Data:', data);
         appState.sessionId = data.sessionId;
         const baseUrl = window.location.origin + window.location.pathname;
         const shareUrl = `${baseUrl}?session=${appState.sessionId}&participant=2`;
@@ -345,7 +346,7 @@ function startExperience() {
             }
 
             try {
-                await fetch('http://localhost:3001/api/localizacao', {
+                await fetch(window.location.origin + '/api/localizacao', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
