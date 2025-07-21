@@ -539,17 +539,21 @@ function showBothAnswered(answersFromSocket = null) {
     elements.waitingOther.style.display = 'none';
     elements.bothAnswered.style.display = 'block';
     
-    let p1Answer = appState.participants[1].answer;
-    let p2Answer = appState.participants[2].answer;
+    let p1Answer = '';
+    let p2Answer = '';
 
-    if (appState.mode === 'online' && answersFromSocket && appState.participantSocketIds) {
-        // No modo online, as respostas vêm do servidor e são mapeadas pelos socket.id
-        // Usamos os socket.id armazenados para mapear as respostas corretamente
-        const p1SocketId = appState.participantSocketIds[1];
-        const p2SocketId = appState.participantSocketIds[2];
-
-        p1Answer = answersFromSocket[p1SocketId] ? answersFromSocket[p1SocketId].answer : '';
-        p2Answer = answersFromSocket[p2SocketId] ? answersFromSocket[p2SocketId].answer : '';
+    if (appState.mode === 'online' && answersFromSocket) {
+        for (const socketId in answersFromSocket) {
+            const answerData = answersFromSocket[socketId];
+            if (answerData.playerName === appState.participants[1].name) {
+                p1Answer = answerData.answer;
+            } else if (answerData.playerName === appState.participants[2].name) {
+                p2Answer = answerData.answer;
+            }
+        }
+    } else { // Local mode or if answersFromSocket is null (shouldn't happen in online mode)
+        p1Answer = appState.participants[1].answer;
+        p2Answer = appState.participants[2].answer;
     }
 
     // Mostrar respostas
