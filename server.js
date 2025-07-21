@@ -5,6 +5,7 @@ const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
 const path = require('path');
+const { getRandomQuestions } = require('./questions.js');
 
 const app = express();
 const server = http.createServer(app);
@@ -57,13 +58,17 @@ io.on('connection', (socket) => {
 
   socket.on('createSession', (data) => {
     const sessionId = Math.random().toString(36).substring(2, 9);
+    const questions = getRandomQuestions(10); // Gera perguntas para a sessão
     sessions[sessionId] = {
       players: { [socket.id]: data.playerName },
       answers: {},
-      currentQuestion: 0
+      currentQuestion: 0,
+      questions: questions // Armazena as perguntas na sessão
     };
     socket.join(sessionId);
     socket.emit('sessionCreated', { sessionId });
+    // Envia a primeira pergunta para o criador da sessão
+    socket.emit('loadQuestion', { questions: questions, currentQuestion: 0 });
   });
 
   socket.on('joinSession', (data) => {
@@ -72,16 +77,19 @@ io.on('connection', (socket) => {
       sessions[sessionId].players[socket.id] = playerName;
       socket.join(sessionId);
       io.to(sessionId).emit('playerJoined', { players: sessions[sessionId].players });
+      // Envia as perguntas e a pergunta atual para o jogador que acabou de entrar
+      socket.emit('loadQuestion', { questions: sessions[sessionId].questions, currentQuestion: sessions[sessionId].currentQuestion });
     } else {
       socket.emit('sessionError', { message: 'Session is full or does not exist.' });
     }
   });
 
   socket.on('submitAnswer', (data) => {
-    const { sessionId, answer } = data;
+    const { sessionId, answer, participantId } = data; // Adicionado participantId
     if (sessions[sessionId]) {
-      sessions[sessionId].answers[socket.id] = answer;
-      const allPlayersAnswered = Object.keys(sessions[sessionId].players).every(p => sessions[sessionId].answers[p]);
+      // Armazena a resposta associada ao socket.id e ao nome do jogador
+      sessions[sessionId].answers[socket.id] = { answer, playerName: sessions[sessionId].players[socket.id] };
+      const allPlayersAnswered = Object.keys(sessions[sessionId].players).every(socketId => sessions[sessionId].answers[socketId]);
       if (allPlayersAnswered) {
         io.to(sessionId).emit('allAnswered', { answers: sessions[sessionId].answers });
       }
@@ -92,8 +100,10 @@ io.on('connection', (socket) => {
     const { sessionId } = data;
     if (sessions[sessionId]) {
       sessions[sessionId].currentQuestion++;
-      sessions[sessionId].answers = {};
-      io.to(sessionId).emit('loadNextQuestion', { currentQuestion: sessions[sessionId].currentQuestion });
+      sessions[sessionId].answers = {}; // Limpa as respostas para a próxima pergunta
+      // Envia a próxima pergunta para todos os jogadores na sessão
+      console.log(`Server: Emitting loadQuestion to all in session ${sessionId}. Questions count: ${sessions[sessionId].questions.length}, Current question: ${sessions[sessionId].currentQuestion}`);
+      io.to(sessionId).emit('loadQuestion', { questions: sessions[sessionId].questions, currentQuestion: sessions[sessionId].currentQuestion });
     }
   });
 

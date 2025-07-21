@@ -130,14 +130,18 @@ function initializeApp() {
         const baseUrl = window.location.origin + window.location.pathname;
         const shareUrl = `${baseUrl}?session=${appState.sessionId}&participant=2`;
         elements.shareLink.value = shareUrl;
-        QRCode.toCanvas(elements.qrCode, shareUrl, {
-            width: 200,
-            margin: 2,
-            color: {
-                dark: '#667eea',
-                light: '#ffffff'
-            }
-        });
+        if (typeof QRCode !== 'undefined') {
+            QRCode.toCanvas(elements.qrCode, shareUrl, {
+                width: 200,
+                margin: 2,
+                color: {
+                    dark: '#667eea',
+                    light: '#ffffff'
+                }
+            });
+        } else {
+            console.error("QRCode library not loaded or initialized yet. Cannot generate QR code.");
+        }
         elements.connectionStatus.textContent = 'Aguardando o outro jogador...';
         showScreen('share');
     });
@@ -193,16 +197,30 @@ function initializeApp() {
 
 function validateInputs() {
     let isInputValid = false;
+    const person1NameValue = elements.person1Name.value.trim();
+    const person2NameValue = elements.person2Name.value.trim();
 
     if (appState.mode === 'local') {
-        isInputValid = elements.person1Name.value.trim().length > 0 && elements.person2Name.value.trim().length > 0;
+        isInputValid = person1NameValue.length > 0 && person2NameValue.length > 0;
     } else { // Online mode
-        // Se myParticipantId já estiver definido, valida o campo correspondente
-        // Ou se for o criador de uma nova sessão (myParticipantId === null e sessionId === null)
-        if (appState.myParticipantId === 1 || (appState.myParticipantId === null && appState.sessionId === null)) {
-            isInputValid = elements.person1Name.value.trim().length > 0;
-        } else if (appState.myParticipantId === 2) {
-            isInputValid = elements.person2Name.value.trim().length > 0;
+        let currentParticipantId = appState.myParticipantId;
+
+        // Se myParticipantId não estiver definido, tenta obtê-lo dos parâmetros da URL
+        if (currentParticipantId === null) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const participantIdFromUrl = urlParams.get('participant');
+            if (participantIdFromUrl) {
+                currentParticipantId = parseInt(participantIdFromUrl);
+            } else {
+                // Padrão para participante 1 se não houver parâmetro de URL e myParticipantId não estiver definido (criador de nova sessão)
+                currentParticipantId = 1;
+            }
+        }
+
+        if (currentParticipantId === 1) {
+            isInputValid = person1NameValue.length > 0;
+        } else if (currentParticipantId === 2) {
+            isInputValid = person2NameValue.length > 0;
         }
     }
     elements.startBtn.disabled = !isInputValid;
@@ -257,34 +275,28 @@ function startExperience() {
         startLocalMode();
     } else { // Online mode
         let myName = '';
+        let myNameInput = null; // Reference to the input element
 
-        // Garante que myParticipantId esteja definido antes de qualquer validação de nome
-        if (appState.myParticipantId === null) {
-            // Se não há sessionId, é uma nova sessão, então este usuário é o participante 1
-            if (!appState.sessionId) {
-                appState.myParticipantId = 1;
-                appState.otherParticipantId = 2;
-            } else {
-                // Se há sessionId mas myParticipantId é null, significa que a página foi carregada
-                // com um link de sessão, e este usuário é o participante 2.
+        // Determine which input field corresponds to 'my' name based on current state
+        // This logic needs to be robust for both new sessions and joining existing ones
+        if (appState.myParticipantId === 1 || (appState.myParticipantId === null && !appState.sessionId)) {
+            // If creating a new session (myParticipantId is null and no sessionId) or already participant 1
+            myNameInput = elements.person1Name;
+            appState.myParticipantId = 1; // Explicitly set for new session creator
+            appState.otherParticipantId = 2;
+        } else if (appState.myParticipantId === 2 || (appState.myParticipantId === null && appState.sessionId)) {
+            // If joining an existing session (myParticipantId is null but sessionId exists) or already participant 2
+            myNameInput = elements.person2Name;
+            // If myParticipantId is null here, it means we're joining a session as participant 2
+            if (appState.myParticipantId === null) {
                 const urlParams = new URLSearchParams(window.location.search);
                 const participantIdFromUrl = urlParams.get('participant');
-                if (participantIdFromUrl) {
-                    appState.myParticipantId = parseInt(participantIdFromUrl);
-                    appState.otherParticipantId = (appState.myParticipantId === 1) ? 2 : 1;
-                } else {
-                    // Fallback: assume participante 1 se não houver informações claras
-                    appState.myParticipantId = 1;
-                    appState.otherParticipantId = 2;
-                }
+                appState.myParticipantId = parseInt(participantIdFromUrl); // Should be 2
+                appState.otherParticipantId = 1;
             }
         }
 
-        if (appState.myParticipantId === 1) {
-            myName = person1Name;
-        } else if (appState.myParticipantId === 2) {
-            myName = person2Name;
-        }
+        myName = myNameInput.value.trim();
 
         if (!myName) {
             alert('Por favor, digite seu nome!');
@@ -307,6 +319,9 @@ function startExperience() {
         } else {
             // Criando uma nova sessão
             socket.emit('createSession', { playerName: myName });
+            appState.myParticipantId = 1; // The creator is always participant 1
+            appState.otherParticipantId = 2;
+            validateInputs(); // Chamar validateInputs após definir myParticipantId
             elements.otherPersonName.textContent = appState.participants[appState.otherParticipantId].name; // Será 'Aguardando...' inicialmente
             elements.connectionStatus.textContent = 'Aguardando o outro jogador...';
         }
@@ -366,6 +381,7 @@ function startLocalMode() {
     appState.questions = getRandomQuestions(10); // Carrega perguntas para o modo local
     elements.totalQuestionsSpan.textContent = appState.questions.length;
     startExperienceScreen();
+    console.log('Client: startExperienceScreen() called.');
 }
 
 function startExperienceScreen() {
@@ -381,6 +397,8 @@ function startExperienceScreen() {
         loadQuestion();
     }
     updateInterface();
+    console.log('Client: updateInterface() called.');
+}
 }
 
 function loadQuestion() {
