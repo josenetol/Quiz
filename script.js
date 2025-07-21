@@ -37,7 +37,7 @@ const elements = {
     optionBtns: document.querySelectorAll('.option-btn'),
     
     // Compartilhamento
-    shareLink: document.getElementById('share-link'),
+    shareLink: document.getElementById('shareLink'),
     copyLinkBtn: document.getElementById('copy-link'),
     qrCode: document.getElementById('qr-code'),
     connectionStatus: document.getElementById('connection-status'),

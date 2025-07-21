@@ -92,6 +92,10 @@ const fetishQuestions = [
 ];
 
 // Função para obter perguntas aleatórias
+module.exports = {
+    getRandomQuestions
+};
+
 function getRandomQuestions(count = 10) {
     const shuffled = [...fetishQuestions].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
