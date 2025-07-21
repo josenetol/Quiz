@@ -128,9 +128,9 @@ function initializeApp() {
     socket.on('sessionCreated', (data) => {
         console.log('Client: Received sessionCreated event. Data:', data);
         appState.sessionId = data.sessionId;
-        const baseUrl = window.location.origin + window.location.pathname;
-        const shareUrl = `${baseUrl}?session=${appState.sessionId}&participant=2`;
+        const shareUrl = `${window.location.origin}?session=${appState.sessionId}&participant=2`;
         elements.shareLinkInput.value = shareUrl;
+        console.log("Link gerado:", elements.shareLinkInput.value);
         if (typeof QRCode !== 'undefined') {
             QRCode.toCanvas(elements.qrCode, shareUrl, {
                 width: 200,
@@ -485,10 +485,18 @@ function updateCharCounter() {
 function submitAnswer() {
     const answer = elements.answerInput.value.trim();
     if (!answer) return;
+
+    let participantToUpdateId;
+    if (appState.mode === 'local') {
+        participantToUpdateId = appState.currentPerson;
+    } else { // online mode
+        participantToUpdateId = appState.myParticipantId;
+    }
     
     // Salvar resposta localmente
-    appState.participants[appState.myParticipantId].answer = answer;
-    appState.participants[appState.myParticipantId].answered = true;
+    appState.participants[participantToUpdateId].answer = answer;
+    appState.participants[participantToUpdateId].answered = true;
+    console.log(`Client: Submitted answer for participant ${participantToUpdateId}. Answer: ${answer}`);
     
     if (appState.mode === 'online') {
         socket.emit('submitAnswer', { sessionId: appState.sessionId, answer: answer, participantId: appState.myParticipantId });
@@ -554,6 +562,7 @@ function nextQuestion() {
         }
     };
     appState.answers.push(questionData);
+    console.log('Client: Moving to next question.');
     
     if (appState.mode === 'online') {
         socket.emit('nextQuestion', { sessionId: appState.sessionId });

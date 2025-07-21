@@ -22,6 +22,9 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(__dirname));
 
+// Rota de saúde
+app.get("/health", (req, res) => res.send("OK"));
+
 // Cria banco de dados local
 const db = new sqlite3.Database('dados.db');
 
