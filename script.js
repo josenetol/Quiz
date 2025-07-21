@@ -129,8 +129,15 @@ function initializeApp() {
         console.log('Client: Received sessionCreated event. Data:', data);
         appState.sessionId = data.sessionId;
         const shareUrl = `${window.location.origin}?session=${appState.sessionId}&participant=2`;
-        elements.shareLinkInput.value = shareUrl;
-        console.log("Link gerado:", elements.shareLinkInput.value);
+
+        // Garante que os elementos existem antes de tentar usá-los
+        if (!elements.shareLink || !elements.qrCode) {
+            console.error('Elemento de link ou QR Code não encontrado no objeto elements.');
+            return;
+        }
+
+        elements.shareLink.value = shareUrl;
+        console.log("Link gerado:", elements.shareLink.value);
         if (typeof QRCode !== 'undefined') {
             QRCode.toCanvas(elements.qrCode, shareUrl, {
                 width: 200,

@@ -1,0 +1,32 @@
+Garante que a DOM foi carregada antes de tentar gerar ou exibir o link
+document.addEventListener('DOMContentLoaded', () => {
+    const linkConviteInput = document.getElementById('linkConvite');
+    const qrCodeCanvas = document.getElementById('qrCodeCanvas');
+
+    if (!linkConviteInput || !qrCodeCanvas) {
+        console.error('Elemento de link ou QR Code não encontrado.');
+        return;
+    }
+
+    // Garante que está no modo online e a URL base está correta
+    const baseURL = window.location.origin;
+    if (!baseURL) {
+        console.error('Não foi possível obter a URL base.');
+        return;
+    }
+
+    // Cria o link com parâmetro de sala
+    const roomCode = gerarCodigoSala(); // substitua por seu método real
+    const linkCompleto = `${baseURL}?sala=${roomCode}`;
+    linkConviteInput.value = linkCompleto;
+
+    // Gera o QR Code
+    new QRCode(qrCodeCanvas, {
+        text: linkCompleto,
+        width: 200,
+        height: 200
+    });
+
+  //Log para ver se foi gerado
+    console.log('Link gerado:', linkCompleto);
+});
