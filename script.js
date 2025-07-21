@@ -130,7 +130,7 @@ function initializeApp() {
         appState.sessionId = data.sessionId;
         const baseUrl = window.location.origin + window.location.pathname;
         const shareUrl = `${baseUrl}?session=${appState.sessionId}&participant=2`;
-        elements.shareLink.value = shareUrl;
+        elements.shareLinkInput.value = shareUrl;
         if (typeof QRCode !== 'undefined') {
             QRCode.toCanvas(elements.qrCode, shareUrl, {
                 width: 200,
